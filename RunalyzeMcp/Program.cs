@@ -43,6 +43,6 @@ builder.Services
 var app = builder.Build();
 
 app.MapGet("/health", () => "OK");
-app.MapMcp();
+app.MapMcp("/mcp");
 
 app.Run();
