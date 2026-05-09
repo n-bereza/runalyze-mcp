@@ -19,6 +19,7 @@ if (useStdio)
                 {
                     Tools = new ToolsCapability
                     {
+                        ListChanged = true,
                         ListToolsHandler = (request, cancellationToken) =>
                         {
                             return ValueTask.FromResult(new ListToolsResult { Tools = ToolDefinitions.AllTools });
@@ -51,6 +52,7 @@ else
             {
                 Tools = new ToolsCapability
                 {
+                    ListChanged = true,
                     ListToolsHandler = (request, cancellationToken) =>
                     {
                         return ValueTask.FromResult(new ListToolsResult { Tools = ToolDefinitions.AllTools });
