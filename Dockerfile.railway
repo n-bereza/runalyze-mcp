@@ -1,0 +1,29 @@
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY ["RunalyzeMcp/RunalyzeMcp.csproj", "RunalyzeMcp/"]
+RUN dotnet restore "RunalyzeMcp/RunalyzeMcp.csproj"
+COPY . .
+WORKDIR "/src/RunalyzeMcp"
+RUN dotnet publish "RunalyzeMcp.csproj" -c Release -o /app/publish --no-restore
+
+FROM node:20-slim AS final
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get clean
+RUN npm install -g mcp-proxy
+
+RUN apt-get update && apt-get install -y wget && \
+    wget https://dot.net/v1/dotnet-install.sh && \
+    bash dotnet-install.sh --channel 9.0 --install-dir /usr/share/dotnet && \
+    ln -s /usr/share/dotnet/dotnet /usr/local/bin/dotnet && \
+    rm dotnet-install.sh
+
+WORKDIR /app
+COPY --from=build /app/publish .
+
+EXPOSE 3000
+
+CMD mcp-proxy --port 3000 --allow-origin "*" -- dotnet RunalyzeMcp.dll
